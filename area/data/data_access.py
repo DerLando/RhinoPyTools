@@ -108,6 +108,7 @@ class DataAccess(object):
         geo = self._get_geo(id)
         if not geo:
             print(error + "could not find geo for id: " + str(id))
+            return
 
         # create room_attrs helper
         room_attrs = _RoomAttributes(attrs)
@@ -115,6 +116,7 @@ class DataAccess(object):
         # check if a room exists
         if not room_attrs.exists:
             print(error + "No room exists for id: " + str(id))
+            return
 
         # create room object
         room = RoomFactory.create_from_geo(geo, room_attrs.identifier, room_attrs.target_area)
@@ -127,7 +129,30 @@ class DataAccess(object):
         return room
 
     def update_room(self, id, sIdentifier=None, dTargetArea=None):
-        pass
+        # error handling
+        error = "DataAccess.update_room ERROR: "
+
+        # try to retrieve attrs for id from doc
+        attrs = self._get_attributes(id)
+        if not attrs:
+            print(error + "could not find attributes for id: " + str(id))
+            return
+
+        # create attr mapping
+        room_attrs = _RoomAttributes(attrs)
+
+        # check if a room exists
+        if not room_attrs.exists:
+            print(error + "No room exists for id: " + str(id))
+            return
+
+        if sIdentifier:
+            room_attrs.identifier = sIdentifier
+
+        if dTargetArea:
+            room_attrs.target_area = dTargetArea
+
+        return
 
     def delete_room(self, id):
         # error handling
