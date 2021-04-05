@@ -1,4 +1,4 @@
-from roomdata import RoomData
+from data.roomdata import RoomData
 import Rhino
 from Rhino.Geometry import GeometryBase, Brep, Surface, Curve, Hatch, AreaMassProperties, Vector3d
 from Rhino.DocObjects import ObjectType

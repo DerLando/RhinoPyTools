@@ -1,6 +1,7 @@
-from roomdata import RoomData
-from room import RoomFactory
+from data.roomdata import RoomData
+from data.room_factory import RoomFactory
 from Rhino import RhinoDoc
+from distutils.util import strtobool
 
 ROOM_USER_KEY = "LPYT_AC_Enabled"
 ROOM_IDENTIFIER_KEY = "LPYT_AC_RoomIdentifier"
@@ -35,6 +36,15 @@ class DataAccess(object):
 
         return obj.Attributes
 
+    def _room_exists(self, attrs):
+        return bool(strtobool(attrs.GetUserString(ROOM_USER_KEY)))
+
+    def _room_name(self, attrs):
+        return attrs.GetUserString(ROOM_IDENTIFIER_KEY)
+
+    def _room_target_area(self, attrs):
+        return float(attrs.GetUserString(ROOM_TARGET_AREA_KEY))
+
     def create_room(self, id, sIdentifier, dTargetArea):
         # get geometry
         geo = self._get_geo(id)
@@ -58,7 +68,38 @@ class DataAccess(object):
         
 
     def read_room(self, id):
-        pass
+        # error handling
+        error = "DataAccess.read_room ERROR: "
+
+        # try to retrieve attrs for id from doc
+        attrs = self._get_attributes(id)
+        if not attrs:
+            print(error + "could not find attributes for id: " + str(id))
+            return
+
+        # try to retrieve geo from doc
+        geo = self._get_geo(id)
+        if not geo:
+            print(error + "could not find geo for id: " + str(id))
+
+        # check if a room exists
+        bExists = self._room_exists(attrs)
+        if not bExists:
+            print(error + "No room exists for id: " + str(id))
+
+        # retrieve room fields from doc
+        sIdentifier = self._room_name(attrs)
+        dTargetArea = self._room_target_area(attrs)
+
+        # create room object
+        room = RoomFactory.create_from_geo(geo, sIdentifier, dTargetArea)
+
+        # check if we could create a valid room, error out if not
+        if not room:
+            print("DataAccess.read_room ERROR: Could not read a valid room for id: " + str(id))
+            return
+        
+        return room
 
     def update_room(self, id, sIdentifier=None, dTargetArea=None):
         pass
