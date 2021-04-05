@@ -1,5 +1,5 @@
 from roomdata import RoomData
-from room import Room
+from room import RoomFactory
 from Rhino import RhinoDoc
 
 ROOM_USER_KEY = "LPYT_AC_Enabled"
@@ -40,7 +40,7 @@ class DataAccess(object):
         geo = self._get_geo(id)
 
         # create room object
-        room = Room.create_from_geo(geo, sIdentifier, dTargetArea)
+        room = RoomFactory.create_from_geo(geo, sIdentifier, dTargetArea)
 
         # check if we could create a valid room, error out if not
         if not room:

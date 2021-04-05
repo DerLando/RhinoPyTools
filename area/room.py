@@ -1,19 +1,40 @@
 from roomdata import RoomData
 import Rhino
-from Rhino.Geometry import GeometryBase, Brep, Surface, Curve, Hatch, AreaMassProperties
+from Rhino.Geometry import GeometryBase, Brep, Surface, Curve, Hatch, AreaMassProperties, Vector3d
 from Rhino.DocObjects import ObjectType
 
+def _is_same_plane_direction(planeA, planeB):
+    return planeA.ZAxis.IsParallelTo(planeB.ZAxis) == 1
+
+def _get_plane(brepFace):
+    u = brepFace.Domain(0).Min
+    v = brepFace.Domain(1).Min
+
+    bSuccess, frame = brepFace.FrameAt(u, v)
+    return frame
+
 def _is_valid_brep(brep):
-    pass
+    # single face breps are easy
+    if brep.Faces.Count == 1:
+        return brep.IsValid and brep.Faces[0].IsPlanar()
+
+    # test if all brep faces are planar
+    if not all([face.IsPlanar() for face in brep.Faces]):
+        return False
+
+    # TODO: Test if all brep faces share the same plane direction (ZAxis)
+    frame = _get_plane(brep.Faces[0])
+    return all([_is_same_plane_direction(frame, _get_plane(face)) for face in brep.Faces])
+
 
 def _is_valid_surface(srf):
-    pass
+    return srf.IsValid and srf.IsPlanar()
 
 def _is_valid_curve(crv):
     return crv.IsValid and crv.IsClosed and crv.IsPlanar()
 
 def _is_valid_hatch(hatch):
-    pass
+    return hatch.IsValid
 
 def _is_valid_room_geometry(geo):
     # test the different geo types
@@ -45,16 +66,27 @@ def _calculate_area(geo):
 
     return amp.Area
 
-class Room(object):
-
-    def __init__(self, poco):
-        self.poco = poco
+class RoomFactory(object):
+    """
+    A static factory helper class, to generate
+    RoomData from different inputs.
+    """
 
     @staticmethod
     def create_from_geo(geo, sIdentifier, dTargetArea):
+        """Creates RoomData from the given geometry.
+
+        Args:
+            geo (GeometryBase): The geometry of the room
+            sIdentifier (String): The identifier or name of the room
+            dTargetArea (double): The area the room should have
+
+        Returns:
+            RoomData: The RoomData created
+        """
 
         # validate input
-        error_message = "Room.create_from_geo ERROR: "
+        error_message = "RoomFactory.create_from_geo ERROR: "
         if not geo:
             print(error_message + "No valid geo")
             return
@@ -75,7 +107,5 @@ class Room(object):
             return
 
         # create room poco
-        poco = RoomData(sIdentifier, dTargetArea, dArea)
-
-        return Room(poco)
+        return RoomData(sIdentifier, dTargetArea, dArea)
         
