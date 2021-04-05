@@ -2,7 +2,7 @@ import Rhino
 from data.data_access import DataAccess
 from Rhino.DocObjects import ObjectType
 
-def delete_room(id):
+def read_room(id):
 
     # get doc 
     doc = Rhino.RhinoDoc.ActiveDoc
@@ -11,7 +11,7 @@ def delete_room(id):
     access = DataAccess(doc)
 
     # create room from id
-    access.delete_room(id)
+    return access.read_room(id)
 
 def main():
     # get object for room
@@ -19,7 +19,9 @@ def main():
     if result != Rhino.Commands.Result.Success:
         return result
 
-    delete_room(objRef.ObjectId)
+    room = read_room(objRef.ObjectId)
+
+    print(room)
 
 if __name__ == "__main__":
     main()

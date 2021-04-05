@@ -7,6 +7,41 @@ ROOM_USER_KEY = "LPYT_AC_Enabled"
 ROOM_IDENTIFIER_KEY = "LPYT_AC_RoomIdentifier"
 ROOM_TARGET_AREA_KEY = "LPYT_AC_TargetArea"
 
+class _RoomAttributes(object):
+    """
+    Helper class to map to and from ObjectAttributes
+    """
+
+    def __init__(self, attrs):
+        self._attrs = attrs
+
+    @property
+    def exists(self):
+        return bool(strtobool(self._attrs.GetUserString(ROOM_USER_KEY)))
+
+    @exists.setter
+    def exists(self, bExists):
+        # TODO: Handle failure here as SetUserString returns a bool
+        self._attrs.SetUserString(ROOM_USER_KEY, str(bExists))
+
+    @property
+    def identifier(self):
+        return self._attrs.GetUserString(ROOM_IDENTIFIER_KEY)
+
+    @identifier.setter
+    def identifier(self, sIdentifier):
+        # TODO: Handle failure here as SetUserString returns a bool
+        self._attrs.SetUserString(ROOM_IDENTIFIER_KEY, sIdentifier)
+
+    @property
+    def target_area(self):
+        return float(self._attrs.GetUserString(ROOM_TARGET_AREA_KEY))
+
+    @target_area.setter
+    def target_area(self, dTargetArea):
+        # TODO: Handle failure here as SetUserString returns a bool
+        self._attrs.SetUserString(ROOM_TARGET_AREA_KEY, str(dTargetArea))
+
 class DataAccess(object):
     """
     Data Access layer for rooms.
@@ -36,15 +71,6 @@ class DataAccess(object):
 
         return obj.Attributes
 
-    def _room_exists(self, attrs):
-        return bool(strtobool(attrs.GetUserString(ROOM_USER_KEY)))
-
-    def _room_name(self, attrs):
-        return attrs.GetUserString(ROOM_IDENTIFIER_KEY)
-
-    def _room_target_area(self, attrs):
-        return float(attrs.GetUserString(ROOM_TARGET_AREA_KEY))
-
     def create_room(self, id, sIdentifier, dTargetArea):
         # get geometry
         geo = self._get_geo(id)
@@ -61,10 +87,11 @@ class DataAccess(object):
         attrs = self._get_attributes(id)
         if not attrs: return
 
-        bSuccess = attrs.SetUserString(ROOM_USER_KEY, str(True))
-        bSuccess = attrs.SetUserString(ROOM_IDENTIFIER_KEY, sIdentifier)
-        bSuccess = attrs.SetUserString(ROOM_TARGET_AREA_KEY, str(dTargetArea))
-
+        # set flags on attrs
+        room_attrs = _RoomAttributes(attrs)
+        room_attrs.exists = True
+        room_attrs.identifier = sIdentifier
+        room_attrs.target_area = dTargetArea
         
 
     def read_room(self, id):
@@ -82,17 +109,15 @@ class DataAccess(object):
         if not geo:
             print(error + "could not find geo for id: " + str(id))
 
+        # create room_attrs helper
+        room_attrs = _RoomAttributes(attrs)
+
         # check if a room exists
-        bExists = self._room_exists(attrs)
-        if not bExists:
+        if not room_attrs.exists:
             print(error + "No room exists for id: " + str(id))
 
-        # retrieve room fields from doc
-        sIdentifier = self._room_name(attrs)
-        dTargetArea = self._room_target_area(attrs)
-
         # create room object
-        room = RoomFactory.create_from_geo(geo, sIdentifier, dTargetArea)
+        room = RoomFactory.create_from_geo(geo, room_attrs.identifier, room_attrs.target_area)
 
         # check if we could create a valid room, error out if not
         if not room:
@@ -105,4 +130,18 @@ class DataAccess(object):
         pass
 
     def delete_room(self, id):
-        pass
+        # error handling
+        error = "DataAccess.delete_room ERROR: "
+
+        # try to retrieve attrs for id from doc
+        attrs = self._get_attributes(id)
+        if not attrs:
+            print(error + "could not find attributes for id: " + str(id))
+            return
+
+        # create mapping
+        room_attrs = _RoomAttributes(attrs)
+
+        # set exits to false, deleting the room from queries
+        room_attrs.exists = False
+
