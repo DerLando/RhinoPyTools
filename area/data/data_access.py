@@ -76,7 +76,7 @@ class DataAccess(object):
         geo = self._get_geo(id)
 
         # create room object
-        room = RoomFactory.create_from_geo(geo, sIdentifier, dTargetArea)
+        room = RoomFactory.create_from_geo(geo, id, sIdentifier, dTargetArea)
 
         # check if we could create a valid room, error out if not
         if not room:
@@ -91,8 +91,7 @@ class DataAccess(object):
         room_attrs = _RoomAttributes(attrs)
         room_attrs.exists = True
         room_attrs.identifier = sIdentifier
-        room_attrs.target_area = dTargetArea
-        
+        room_attrs.target_area = dTargetArea 
 
     def read_room(self, id):
         # error handling
@@ -119,7 +118,7 @@ class DataAccess(object):
             return
 
         # create room object
-        room = RoomFactory.create_from_geo(geo, room_attrs.identifier, room_attrs.target_area)
+        room = RoomFactory.create_from_geo(geo, id, room_attrs.identifier, room_attrs.target_area)
 
         # check if we could create a valid room, error out if not
         if not room:
@@ -170,3 +169,10 @@ class DataAccess(object):
         # set exits to false, deleting the room from queries
         room_attrs.exists = False
 
+    def get_rooms(self, ignore_deleted=True):
+        rhObjs = self.doc.Objects.FindByUserString(ROOM_USER_KEY, str(True), True)
+        if not rhObjs:
+            print("DataAccess.get_rooms ERROR: No rooms defined in current document!")
+            return
+
+        return [self.read_room(rhObj.Id) for rhObj in rhObjs]

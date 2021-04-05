@@ -19,20 +19,20 @@ def main():
     if result != Rhino.Commands.Result.Success:
         return result
 
-    # # get identifier
-    # sIdent = ""
-    # result = Rhino.Input.RhinoGet.GetString("Specifiy ident", False, sIdent)
-    # print(sIdent)
-    # if not sIdent: return
+    # get identifier
+    sIdent = ""
+    result = Rhino.Input.RhinoGet.GetString("Specifiy ident", False, sIdent)
+    print(sIdent)
+    if not sIdent: return
 
-    # # get target Area
-    # result, dArea = Rhino.Input.RhinoGet.GetNumber("Specify target area", False)
-    # if result != Rhino.Commands.Result.Success:
-    #     return result
+    # get target Area
+    result, dArea = Rhino.Input.RhinoGet.GetNumber("Specify target area", False)
+    if result != Rhino.Commands.Result.Success:
+        return result
 
     # call actual function
-    # create_room(objRef.ObjectId, sIdent, dArea)
-    create_room(objRef.ObjectId, "Test", 100)
+    create_room(objRef.ObjectId, sIdent, dArea)
+    # create_room(objRef.ObjectId, "Test", 100)
 
 
 if __name__ == "__main__":

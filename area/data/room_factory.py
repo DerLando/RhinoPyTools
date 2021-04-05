@@ -73,7 +73,7 @@ class RoomFactory(object):
     """
 
     @staticmethod
-    def create_from_geo(geo, sIdentifier, dTargetArea):
+    def create_from_geo(geo, id, sIdentifier, dTargetArea):
         """Creates RoomData from the given geometry.
 
         Args:
@@ -107,5 +107,5 @@ class RoomFactory(object):
             return
 
         # create room poco
-        return RoomData(sIdentifier, dTargetArea, dArea)
+        return RoomData(id, sIdentifier, dTargetArea, dArea)
         

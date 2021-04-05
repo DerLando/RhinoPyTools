@@ -4,7 +4,8 @@ class RoomData(object):
     
     """
 
-    def __init__(self, sName, dTargetArea, dActualArea):
+    def __init__(self, id, sName, dTargetArea, dActualArea):
+        self.id = id
         self.name = sName
         self.target_area = dTargetArea
         self.actual_area = dActualArea
