@@ -1,6 +1,6 @@
 import Rhino
 from Rhino.DocObjects import ObjectType
-from data_access import DataAccess
+from data.data_access import DataAccess
 
 def create_room(id, sIdentifier, dTargetArea):
 
