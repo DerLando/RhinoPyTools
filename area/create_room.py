@@ -1,6 +1,7 @@
 import Rhino
 from Rhino.DocObjects import ObjectType
 from data.data_access import DataAccess
+from get_room import GetRoom
 
 def create_room(id, sIdentifier, dTargetArea):
 
@@ -15,24 +16,14 @@ def create_room(id, sIdentifier, dTargetArea):
 
 def main():
     # get object
-    result, objRef = Rhino.Input.RhinoGet.GetOneObject("Select room geometry", False, ObjectType.Brep | ObjectType.Curve | ObjectType.Surface | ObjectType.Hatch)
-    if result != Rhino.Commands.Result.Success:
-        return result
+    gr = GetRoom()
 
-    # # get identifier
-    # sIdent = ""
-    # result = Rhino.Input.RhinoGet.GetString("Specifiy ident", False, sIdent)
-    # print(sIdent)
-    # if not sIdent: return
+    gr.get_room()
 
-    # # get target Area
-    # result, dArea = Rhino.Input.RhinoGet.GetNumber("Specify target area", False)
-    # if result != Rhino.Commands.Result.Success:
-    #     return result
+    if gr.CommandResult() != Rhino.Commands.Result.Success:
+        return gr.Result
 
-    # call actual function
-    # create_room(objRef.ObjectId, sIdent, dArea)
-    create_room(objRef.ObjectId, "Test", 100)
+    create_room(gr.Object(0).ObjectId, gr.room_name, gr.target_area)
 
 
 if __name__ == "__main__":
